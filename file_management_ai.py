@@ -1,5 +1,5 @@
 import os
-from PySide6.QtWidgets import QApplication, QMessageBox, QFileDialog, QVBoxLayout, QHBoxLayout, QFrame, QWidget, QLabel, QPushButton
+from PySide6.QtWidgets import QApplication, QMessageBox, QFileDialog, QWidget
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
 # mmodules

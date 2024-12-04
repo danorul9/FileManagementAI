@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QFrame, QLabel, QPushButton
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QPushButton, QFrame
 
 class LayoutManager:
     @staticmethod
@@ -8,17 +8,20 @@ class LayoutManager:
         app.folder_label = QLabel("Select a folder to manage files:")
         app.select_folder_button = QPushButton("01 Select Folder")
         app.select_folder_button.clicked.connect(app.select_folder)
-        app.folder_path_label = QLabel('') # Text field for folder path
+        app.folder_path_label = QLabel('')  # Text field for folder path
         app.folder_path_label.setFrameStyle(QFrame.Panel | QFrame.Sunken)  # For better appearance
 
         # Folder selection layout
-        folder_title_layout = QHBoxLayout()
-        folder_title_layout.addWidget(app.folder_label)
-        folder_layout = QHBoxLayout()
-        folder_layout.addWidget(app.select_folder_button)
-        folder_layout.addWidget(app.folder_path_label)
-        folder_layout.setContentsMargins(10, 10, 10, 10)  # Add padding
-        folder_layout.setSpacing(10)  # Space between widgets
+        folder_layout = QVBoxLayout()
+        folder_layout.addWidget(app.folder_label)
+        folder_controls_layout = QHBoxLayout()
+        folder_controls_layout.addWidget(app.select_folder_button)
+        folder_controls_layout.addWidget(app.folder_path_label)
+        folder_layout.addLayout(folder_controls_layout)
+
+        # Add a group box for folder selection
+        folder_group_box = QGroupBox("01 Folder Selection")
+        folder_group_box.setLayout(folder_layout)
 
         # Renaming section
         app.rename_button = QPushButton("01 Rename Files")
@@ -30,15 +33,18 @@ class LayoutManager:
         app.revert_button = QPushButton("03 Revert Changes")
         app.revert_button.clicked.connect(app.revert_changes)
 
-         # Horizontal layout for renaming buttons
+        # Horizontal layout for renaming buttons
         rename_layout = QHBoxLayout()
         rename_layout.addWidget(app.rename_button)
         rename_layout.addWidget(app.ai_rename_button)
         rename_layout.addWidget(app.revert_button)
-        rename_layout.setSpacing(20)  # Space between buttons
+
+        # Add a group box for renaming
+        rename_group_box = QGroupBox("02 Renaming")
+        rename_group_box.setLayout(rename_layout)
 
         # Organizing section
-        app.store_structure_button = QPushButton("01 Store File Structure")
+        app.store_structure_button = QPushButton("01 Store Folder Structure")
         app.store_structure_button.clicked.connect(app.store_file_structure)
 
         app.suggest_folders_button = QPushButton("02 Suggest Folders")
@@ -48,23 +54,22 @@ class LayoutManager:
         organizing_layout = QHBoxLayout()
         organizing_layout.addWidget(app.store_structure_button)
         organizing_layout.addWidget(app.suggest_folders_button)
-        organizing_layout.setSpacing(20)  # Space between buttons
-      
-         # Main layout
+
+        # Add a group box for organizing
+        organizing_group_box = QGroupBox("03 Organising")
+        organizing_group_box.setLayout(organizing_layout)
+
+        # Main layout
         main_layout = QVBoxLayout()
-        main_layout.addLayout(folder_title_layout)  # Add folder selection section
-        main_layout.addSpacing(20)  # Add some space between sections
-        main_layout.addLayout(folder_layout)  # Add folder selection section
-        main_layout.addSpacing(20)  # Add some space between sections
-        main_layout.addLayout(rename_layout)  # Add renaming section
-        main_layout.addSpacing(20)  # Add some space between sections
-        main_layout.addLayout(organizing_layout)  # Add renaming section
+        main_layout.addWidget(folder_group_box)  # Add folder selection group
+        main_layout.addWidget(rename_group_box)  # Add renaming group
+        main_layout.addWidget(organizing_group_box)  # Add organizing group
         main_layout.setContentsMargins(20, 20, 20, 20)  # Add padding around the entire layout
 
         # Set the layout to the window
         app.setLayout(main_layout)
         app.setWindowTitle("File Management App")
-        app.resize(400, 200)
+        app.resize(400, 300)
 
         app.folder_path = ""
         app.renamed_files = {}
