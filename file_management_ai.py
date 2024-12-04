@@ -1,46 +1,23 @@
 import os
-import tkinter as tk
-from tkinter import filedialog, messagebox
-from tkinter import ttk
+from PySide6.QtWidgets import QApplication, QMessageBox, QFileDialog, QVBoxLayout, QHBoxLayout, QFrame, QWidget, QLabel, QPushButton
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
+# mmodules
+from theme_manager import ThemeManager
+from layout_manager import LayoutManager
 
-class FileRenamerApp:
-    def __init__(self, master):
-        self.master = master
-        master.title("File Renamer")
-        self.set_theme()
-
-        self.label = ttk.Label(master, text="Select a folder to rename files:")
-        self.label.pack(pady=10)
-
-        self.select_button = ttk.Button(master, text="Select Folder", command=self.select_folder)
-        self.select_button.pack(pady=5)
-
-        self.rename_button = ttk.Button(master, text="Rename Files", command=self.rename_files)
-        self.rename_button.pack(pady=5)
-
-        self.store_structure_button = ttk.Button(master, text="Store File Structure", command=self.store_file_structure)
-        self.store_structure_button.pack(pady=5)
-
-        self.revert_button = ttk.Button(master, text="Revert Changes", command=self.revert_changes)
-        self.revert_button.pack(pady=5)
-
-        self.folder_path = ""
-        self.renamed_files = {}
-        self.file_structure = self.load_file_structure()
-
-    def set_theme(self):
-        # Check system theme and set colors accordingly
-        try:
-            import ctypes
-            user32 = ctypes.windll.user32
-            if user32.GetSysColor(0) == 0:  # 0 is the color for the background
-                self.master.tk_setPalette(background='white', foreground='black')
-            else:
-                self.master.tk_setPalette(background='black', foreground='white')
-        except Exception as e:
-            print(f"Error detecting theme: {e}")
+class FileManagementAiApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("File Management AI")
+        # Apply theme on initialization
+        ThemeManager.set_theme() 
+        # Initialize the UI layout
+        self.init_ui()    
+        
+    def init_ui(self):
+        """Set up the user interface layout."""
+        self.setLayout(LayoutManager.create_layout(self))
 
     def load_file_structure(self):
         structure = []
@@ -51,13 +28,16 @@ class FileRenamerApp:
         return structure
 
     def select_folder(self):
-        self.folder_path = filedialog.askdirectory()
+        self.folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
         if not self.folder_path:
-            messagebox.showwarning("Warning", "No folder selected!")
+            QMessageBox.warning(self, "Warning", "No folder selected!")
+        else:
+            self.folder_path_label.setText(self.folder_path)
+            self.folder_path = self.folder_path.replace("\\", "/")  # Convert to Unix-style path
 
     def rename_files(self):
         if not self.folder_path:
-            messagebox.showwarning("Warning", "Please select a folder first!")
+            QMessageBox.warning(self, "Warning", "Please select a folder first!")
             return
 
         for filename in os.listdir(self.folder_path):
@@ -67,14 +47,15 @@ class FileRenamerApp:
                 new_path = os.path.join(self.folder_path, new_name)
                 os.rename(original_path, new_path)
                 self.renamed_files[original_path] = new_path
+    
 
-        # After renaming, suggest top folders for each renamed file
-        for original_path in self.renamed_files.keys():
-            original_filename = os.path.basename(original_path)
-            suggestions = self.suggest_top_folders(original_filename)
-            suggestion_text = "\n".join([f"{folder} - {confidence}%" for folder, confidence in suggestions])
-            messagebox.showinfo("Folder Suggestions", f"Suggested Folders for '{original_filename}':\n{suggestion_text}")
-
+    def ai_rename_files(self):
+        if not self.folder_path:
+            QMessageBox.warning(self, "Warning", "Please select a folder first!")
+            return
+    
+        # Batch 10 files renames for langchain ollam callo to be implemented later
+    
     def store_file_structure(self):
         directory = r"D:\00 Files"
         output_file = "file_structure.txt"
@@ -83,11 +64,11 @@ class FileRenamerApp:
             for root, dirs, files in os.walk(directory):
                 # Limit to 2 levels deep
                 level = root.replace(directory, '').count(os.sep)
-                if level < 2:  # Change from 3 to 2
+                if level == 1:  # Store Level 2 folders only
                     for name in dirs:  # Only write directories
                         f.write(os.path.join(root, name) + '\n')
         
-        messagebox.showinfo("Success", f"File structure saved to {output_file}")
+        QMessageBox.information(self, "Success", f"File structure saved to {output_file}")
 
     def format_filename(self, filename):
         # Convert to title case and remove underscores and hyphens
@@ -126,6 +107,7 @@ class FileRenamerApp:
         self.renamed_files.clear()
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = FileRenamerApp(root)
-    root.mainloop()
+    app = QApplication([]) 
+    window = FileManagementAiApp()
+    window.show()
+    app.exec()

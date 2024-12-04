@@ -1,7 +1,9 @@
-import tkinter as tk
-from file_renamer import FileRenamerApp
+import sys
+from PySide6.QtWidgets import QApplication
+from FileManagementAiApp import file_maangement_ai
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = FileRenamerApp(root)
-    root.mainloop()
+    app = QApplication(sys.argv)
+    window = FileManagementAiApp()
+    window.show()
+    sys.exit(app.exec())
